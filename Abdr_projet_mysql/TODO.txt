@@ -1,0 +1,8 @@
+1. timer estime each iteration like cycle step(transaction)/per date
+a) add Maps (from each thread) to one map 
+b) get values from map and send them to python script
+c) get statistique
+2. add indexs
+http://www.dbnewz.com/2008/06/27/les-index-mysql-types-placements-efficacite/
+
+3.

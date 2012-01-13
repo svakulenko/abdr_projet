@@ -1,7 +1,11 @@
 package common;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class MyS3Timer {
@@ -10,6 +14,10 @@ public class MyS3Timer {
 
 	String logEndTime   = null;
 
+	List l;
+	Map<Long,Integer> SecondsPerTransList = new HashMap<Long, Integer>(); 
+	
+	
 	long timeStart;
 	long timeLimit;
 	int counter;
@@ -27,6 +35,9 @@ public class MyS3Timer {
 	// while (!isTimeIsOut()) { ..your thing... }
 	public boolean isTimeIsOut(){
 		long execTime = (System.currentTimeMillis() - timeStart )/1000; //get sec passed from start
+		
+		SecondsPerTransList.put(execTime, counter);
+		
 		boolean isTimeIsOut = (execTime > timeLimit);
 		
 		if (isTimeIsOut){
@@ -43,6 +54,10 @@ public class MyS3Timer {
 	}
 	public int getCounter(){
 		return counter;
+	}
+	
+	public Map<Long, Integer> getStatistiqueList(){
+		return SecondsPerTransList;
 	}
 
 	public String getLogBeginTime() {
