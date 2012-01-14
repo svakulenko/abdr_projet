@@ -1,8 +1,30 @@
-1. timer estime each iteration like cycle step(transaction)/per date
-a) add Maps (from each thread) to one map 
-b) get values from map and send them to python script
-c) get statistique
+V 1. timer estime each iteration like cycle step(transaction)/per date
+V a) add Maps (from each thread) to one map 
+V b) get values from map and send them to python script
+V c) get statistique
+
+V 1.1. script pour transaction per seconds
+V 1.2. script pour all transaction(+=) in seconds 
+
+V 2.0 check trans : 10 produit, 10 ligne, 1 commande
+  V   check select of prix for 10 produit for commande (commande, client)
 2. add indexs
 http://www.dbnewz.com/2008/06/27/les-index-mysql-types-placements-efficacite/
 
-3.
+2.5 fragmentation ?
+3. all get resultats
+
+Mysql
+1. remote (data bases )
+1 proc
+2 proc
+5 proc
+10(20, to see when is perfomance down)
+
+2. remote (data bases with indexs)
+1 proc
+2 proc
+5 proc
+10(20, to see when is perfomance down)
+
+3. same for simple db

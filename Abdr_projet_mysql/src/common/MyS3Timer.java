@@ -1,11 +1,12 @@
 package common;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
+
+import java.util.*;
 
 
 public class MyS3Timer {
@@ -14,17 +15,21 @@ public class MyS3Timer {
 
 	String logEndTime   = null;
 
-	List l;
-	Map<Long,Integer> SecondsPerTransList = new HashMap<Long, Integer>(); 
+
+	Map<Float,Integer> SecondsPerTransList = new TreeMap<Float, Integer>(); 
 	
 	
-	long timeStart;
-	long timeLimit;
-	int counter;
+	long timeStart = 0;
+	long timeLimit = 0;
+	int counter = 0;
+	long spanTimeStart = 0;
+	long spanTimeEnd = 0;
+	
 	
 	SimpleDateFormat dformat =  new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss");
 	
 	public MyS3Timer (long tL /* seconds */) {
+
 		logBeginTime = "S3Timer time start=" + dformat.format(new Date());
 		System.out.println(logBeginTime);
 		timeStart = System.currentTimeMillis(); //msec
@@ -34,10 +39,22 @@ public class MyS3Timer {
 	
 	// while (!isTimeIsOut()) { ..your thing... }
 	public boolean isTimeIsOut(){
-		long execTime = (System.currentTimeMillis() - timeStart )/1000; //get sec passed from start
+		Long transactionTime = new Long(0);
+		if (spanTimeStart != 0)
+			transactionTime = System.currentTimeMillis() - spanTimeStart;
+		Long purTime  = System.currentTimeMillis() - timeStart;
+		long execTime = purTime/1000; //get sec passed from start
 		
-		SecondsPerTransList.put(execTime, counter);
+		System.out.println("transactionTime=" + transactionTime);
+		String s =String.format("%1.1f", purTime.floatValue()/1000).replace(',', '.');
+		Float val = Float.parseFloat(s);
+		if(!s.equals("0,0")){
 		
+		
+		if( val != 0.0)
+		 
+			SecondsPerTransList.put(val, counter);
+		}
 		boolean isTimeIsOut = (execTime > timeLimit);
 		
 		if (isTimeIsOut){
@@ -46,7 +63,14 @@ public class MyS3Timer {
 		}
 		
 		counter++;
+		spanTimeStart = System.currentTimeMillis();
 		return isTimeIsOut;
+	}
+	public void showFullLog(){
+		Set<Float> s = SecondsPerTransList.keySet();
+		for (Float long1 : s) {
+			System.out.printf("time=%5.1f , transactions = %3d\n", long1, SecondsPerTransList.get(long1));
+		}
 	}
 	
 	public long getStartTime(){
@@ -56,7 +80,7 @@ public class MyS3Timer {
 		return counter;
 	}
 	
-	public Map<Long, Integer> getStatistiqueList(){
+	public Map<Float, Integer> getStatistiqueList(){
 		return SecondsPerTransList;
 	}
 

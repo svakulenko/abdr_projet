@@ -21,10 +21,12 @@ public class loggerClass {
 		System.out.println("openLogStream");
 		try {
 			//String dir = "rapports/";
-			File dir = new File(".");
-			System.out.println(dir.getCanonicalPath());
-			String datePrefix = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss_").format(new Date());
-			bw = new BufferedWriter(new FileWriter("rapports/" + datePrefix+ file,true));
+//			File dir = new File(".");
+//			System.out.println(dir.getCanonicalPath());
+			String datePrefix = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss").format(new Date());
+			String f = "rapports/" +  file + "_" + datePrefix+ ".txt";
+			System.out.println("open file for log:" + f);
+			bw = new BufferedWriter(new FileWriter(f,true));
 		} catch (IOException e) {
 			System.out.println("loggerClass::openLogStream exception:" + e.getMessage());
 		}

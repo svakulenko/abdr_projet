@@ -10,7 +10,7 @@ public class DbHandler {
 	
 	Integer maxx = 1000;
 	
-	public loggerClass log = new loggerClass();
+	//public loggerClass log = new loggerClass();
 	
 //LOCAL CONNECTION
 //    String dbUrl[] = {
@@ -36,6 +36,7 @@ public class DbHandler {
     	  System.out.println("invoke mysql driver .. ");
     	  try {
     		  Class.forName("com.mysql.jdbc.Driver").newInstance();
+    		  System.out.println("driver loaded ... ");
     		  con[0] = DriverManager.getConnection(Conf.url1 , Conf.login, Conf.pwd);
     		  System.out.println("connect to " + Conf.url1  + " !!!");
     		  con[1] = DriverManager.getConnection(Conf.url2 , Conf.login, Conf.pwd);
@@ -54,7 +55,7 @@ public class DbHandler {
 
 	public int updateStatement(String sql_query, Integer Id){
 		System.out.println(sql_query);
-		log.saveBuffer(sql_query + '\n');
+		//log.saveBuffer(sql_query + '\n');
 		int rvalue = -1;
 		Statement st = null;
 		try {
@@ -84,7 +85,7 @@ public class DbHandler {
 		try {
 		con[Id].createStatement().executeUpdate("DROP TABLE COMMANDE");
 		} catch (Exception e) {}
-		System.out.println("here");
+		//System.out.println("here");
 		
  }
 	
@@ -104,7 +105,7 @@ public class DbHandler {
 						+ ", client       BIGINT NOT NULL"		
 						+ ", dateCommande DATE   NOT NULL"						
 						+ ", prixTotal    BIGINT NOT NULL"
-						+ ", PRIMARY KEY (numMagasin, numCommande)"
+						+ ", PRIMARY KEY (numMagasin, numCommande,client)"
 					    + ");"
 					;
 				updateStatement(sql_query, id);
@@ -124,6 +125,7 @@ public class DbHandler {
 				sql_query = "CREATE TABLE LIGNECOMMANDE ("
 						+ "  numMagasin  BIGINT  NOT NULL"
 						+ ", numCommande BIGINT  NOT NULL"
+						+ ", client      BIGINT  NOT NULL"
 						+ ", numProduit  BIGINT  NOT NULL" 
 						+ ", quantite    BIGINT  NOT NULL"
 						+ ", prix        BIGINT  NOT NULL"
@@ -156,17 +158,18 @@ public class DbHandler {
 		}
 		*/
 
-	public Integer getSumOfLingeDeCommands (Integer magasinToConnect, Integer numCommande, Integer numMagasin) throws Exception{
+	public Integer getSumOfLingeDeCommands (Integer magasinToConnect, Integer numCommande, Integer client, Integer numMagasin) throws Exception{
 		Integer rvalue = null;
 		if (connectionExist(magasinToConnect)){
 			String sql_query = "select SUM(prix) FROM LIGNECOMMANDE";
 				   sql_query += " where numMagasin=" + numMagasin.toString();
 				   sql_query += " and numCommande=" + numCommande.toString();
+				   sql_query += " and client=" + client.toString();
 			
 			ResultSet rs = GetSqlResult(sql_query, magasinToConnect);
 			if (rs.next()){
 				
-				System.out.println("GetSqlResult we have next!");
+				//System.out.println("GetSqlResult we have next!");
 					try {
 						rvalue =  rs.getInt("SUM(prix)");
 					} catch (SQLException e){ //THIS BLOCK IS NOT UNECESSERY because MAX return always 0(if no rows in table)
@@ -179,25 +182,22 @@ public class DbHandler {
 		
 		return rvalue;
 	}
-		public Integer getMaxNumCmdInCommande (Integer magasin) {
+		public Integer getMaxNumCmdInCommande (Integer magasin,Integer client) {
 			Integer rvalue = null;
 			if (connectionExist(magasin)){
-				String sql_query = "select MAX(NumCommande) FROM COMMANDE where numMagasin=" + magasin.toString();
+				String sql_query = "select MAX(NumCommande) FROM COMMANDE"
+			+	" where numMagasin=" + magasin.toString()
+			+	" and client=" + client.toString()
+			;
 				
 				ResultSet rs = GetSqlResult(sql_query, magasin);
 				try {
 					if (rs.next()){
-						
-						System.out.println("GetSqlResult we have next!");
-							try {
-								rvalue =  rs.getInt("MAX(NumCommande)");
-							} catch (SQLException e){ //THIS BLOCK IS NOT UNECESSERY because MAX return always 0(if no rows in table)
-								System.out.println("::getMaxNumCmdInCommande Warning SQLException:" + e.getMessage());
-								rvalue = -1;
-							}
+						rvalue =  rs.getInt("MAX(NumCommande)");
 					}
 				} catch (SQLException e) {
 					e.printStackTrace();
+					rvalue = -1;
 				}
 			}
 			System.out.println("end getMaxNumCmdInCommande=" + rvalue);
@@ -205,14 +205,14 @@ public class DbHandler {
 			return rvalue;
 		}
 		
-		public void deleteAllLinesFromLigneCommandeCommande (Integer Id) {
-			if (connectionExist(Id)){
-				sql_query = "DELETE from lignecommande";
-				updateStatement(sql_query, Id);
-				sql_query = "DELETE from commande";
-				updateStatement(sql_query, Id);
-			}
-		}
+//		public void deleteAllLinesFromLigneCommandeCommande (Integer Id) {
+//			if (connectionExist(Id)){
+//				sql_query = "DELETE from lignecommande";
+//				updateStatement(sql_query, Id);
+//				sql_query = "DELETE from commande";
+//				updateStatement(sql_query, Id);
+//			}
+//		}
 		
 		//UPDATE products SET quantity = quantity - 1 WHERE id = '#*$!'; 
 		
@@ -253,28 +253,27 @@ public class DbHandler {
 			
 			
 		}
-		public void transactionCommandFull ( Integer numMagasin	, Integer client) {
+		public void transactionCommandFull ( Integer numMagasin, Integer client) {
 			Integer secondMagasin = 1;
 			
 			if (connectionExist(numMagasin)){
 				try {
 				con[numMagasin].setAutoCommit(false);
-				
-				
-				
-				
+
 				Integer Qte = 5; //constant
 				
 				//get max commande
-				Integer numCommande = getMaxNumCmdInCommande(numMagasin);
+				Integer numCommande = getMaxNumCmdInCommande(numMagasin, client);
 				numCommande++;
 				System.out.println("dao::transactionCommandFull numCommande=" + numCommande);
 				
 
 				//int end = 1000;
 				Random r = new Random();
-				
-				
+				Integer MaxLingeProduitPerTransaction = 10; 
+				int step = 0;
+				while(step++ < MaxLingeProduitPerTransaction){
+					//System.out.println("step="+ step);
 				
 				 
 				//Integer iterator = new Integer(0);
@@ -292,23 +291,26 @@ public class DbHandler {
 						try {
 						con[secondMagasin].setAutoCommit(false);
 						
+						addLigneCommande(secondMagasin, numMagasin, numCommande, client, rInt, Qte, prix);
+						updateProduit(secondMagasin, numCommande, rInt, Qte);
 
 						//add ligne commande
-						con[secondMagasin].createStatement().executeUpdate(
-								"INSERT INTO LIGNECOMMANDE "
-								+ "VALUES (" + numMagasin.toString()
-								+ ","        + numCommande.toString()
-								+ ","        + rInt.toString()
-								+ ","        + Qte.toString()
-								+ ","        + prix.toString()
-								+ ")"
-								);
-						
-						//change produit
-						con[secondMagasin].createStatement().executeUpdate(
-								"UPDATE PRODUIT SET qteEnStock=qteEnStock - " + Qte
-								+ " WHERE numProduit=" + rInt
-								);
+//						con[secondMagasin].createStatement().executeUpdate(
+//								"INSERT INTO LIGNECOMMANDE "
+//								+ "VALUES (" + numMagasin.toString()
+//								+ ","        + numCommande.toString()
+//								+ ","        + client.toString()
+//								+ ","        + rInt.toString()
+//								+ ","        + Qte.toString()
+//								+ ","        + prix.toString()
+//								+ ")"
+//								);
+//						
+//						//change produit
+//						con[secondMagasin].createStatement().executeUpdate(
+//								"UPDATE PRODUIT SET qteEnStock=qteEnStock - " + Qte
+//								+ " WHERE numProduit=" + rInt
+//								);
 						
 						con[secondMagasin].commit();
 						
@@ -320,17 +322,17 @@ public class DbHandler {
 						}
 
 						
-					} else {
-						addLigneCommande(numMagasin, numCommande, rInt, Qte, prix);
+					} else {          /*mag to conn*/ /* mag to add */
+						addLigneCommande(numMagasin, numMagasin, numCommande, client, rInt, Qte, prix);
 						updateProduit(numMagasin, numCommande, rInt, Qte);
 					}
 						
 
 					//iterator++;
-//				}
+				}
 	
-				Integer prixTotalPourCommandeMag2  = getSumOfLingeDeCommands(secondMagasin, numCommande, numMagasin);
-				Integer prixTotalPourCommande  = getSumOfLingeDeCommands(numMagasin, numCommande, numMagasin);
+				Integer prixTotalPourCommandeMag2  = getSumOfLingeDeCommands(secondMagasin, numCommande, client, numMagasin);
+				Integer prixTotalPourCommande  = getSumOfLingeDeCommands(numMagasin, numCommande, client, numMagasin);
 				addCommande(numMagasin
 				, numCommande
 				, null 
@@ -399,22 +401,25 @@ public class DbHandler {
 		}
 		
 		public void addLigneCommande (
-				  Integer numMagasin
+				  Integer magToConnect
+				, Integer numMagasin
 				, Integer numCommande
+				, Integer client
 				, Integer numProduit
 				, Integer quantite
 				, Integer prix
 				) throws SQLException{
-			if (connectionExist(numMagasin)){
+			if (connectionExist(magToConnect)){
 				sql_query = "INSERT INTO LIGNECOMMANDE "
 						+ "VALUES (" + numMagasin.toString()
 						+ ","        + numCommande.toString()
+						+ ","        + client.toString()
 						+ ","        + numProduit.toString()
 						+ ","        + quantite.toString()
 						+ ","        + prix.toString()
 						+ ")";
 				
-				updateStatement(sql_query, numMagasin);
+				updateStatement(sql_query, magToConnect);
 			}
 		}
 		
