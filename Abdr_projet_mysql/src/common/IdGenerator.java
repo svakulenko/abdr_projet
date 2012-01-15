@@ -13,14 +13,17 @@ public class IdGenerator {
 		
 			try {
 				FileReader fr = new FileReader(idfilename);
-				StringBuffer sb = new StringBuffer();
-				if(fr.ready()){
-					sb.append((char)fr.read());
-				}
-				fr.close();
+				BufferedReader br = new BufferedReader(fr);
+				String line = null;
+				line = br.readLine();
+				
+
+				
+				Integer id = Integer.parseInt(line);
+				br.close();
 				
 				//System.out.println("id from file=" + sb.toString());
-				Integer id = Integer.parseInt(sb.toString());
+				
 				
 				id++;
 				System.out.println("get id=" + id);
@@ -40,7 +43,7 @@ public class IdGenerator {
 		//System.out.println("createIdFile id=" + id.toString());
 		try {
 			FileWriter fw = new FileWriter(idfilename,false);
-			fw.write(id.toString());
+			fw.write("" + id.toString());
 			fw.close();
 		} catch (IOException e) {
 			System.out.println("create file exception: " + e.getMessage());

@@ -23,10 +23,10 @@ public class loggerClass {
 			//String dir = "rapports/";
 //			File dir = new File(".");
 //			System.out.println(dir.getCanonicalPath());
-			String datePrefix = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss").format(new Date());
-			String f = "rapports/" +  file + "_" + datePrefix+ ".txt";
+			String datePrefix = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss_").format(new Date());
+			String f = "rapports/" +  file + ".txt";
 			System.out.println("open file for log:" + f);
-			bw = new BufferedWriter(new FileWriter(f,true));
+			bw = new BufferedWriter(new FileWriter(f,false));
 		} catch (IOException e) {
 			System.out.println("loggerClass::openLogStream exception:" + e.getMessage());
 		}

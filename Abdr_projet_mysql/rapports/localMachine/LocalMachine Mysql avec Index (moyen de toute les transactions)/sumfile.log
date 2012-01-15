@@ -1,0 +1,4 @@
+for coef1 with name: LocalMachine Mysql avec Index (moyen de toute les transactions) MAX TRANSACTIONS=210
+for coef2 with name: LocalMachine Mysql avec Index (moyen de toute les transactions) MAX TRANSACTIONS=213
+for coef5 with name: LocalMachine Mysql avec Index (moyen de toute les transactions) MAX TRANSACTIONS=104
+for coef10 with name: LocalMachine Mysql avec Index (moyen de toute les transactions) MAX TRANSACTIONS=64

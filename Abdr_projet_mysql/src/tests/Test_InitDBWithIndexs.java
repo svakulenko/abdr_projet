@@ -2,7 +2,7 @@ package tests;
 
 
 import db.*;
-public class Test_InitDB {
+public class Test_InitDBWithIndexs {
 
 	DbHandler dbhand = new DbHandler();
 	
@@ -19,18 +19,23 @@ public class Test_InitDB {
 	public void initDb(){
 		dbhand.createDb(0);
 		dbhand.createDb(1);
+		dbhand.createIndexForProduit(0);
+		dbhand.createIndexForProduit(1);
+		
+		
 	}
 	public void destroyDb(){
 		dbhand.dropIndexForProduit(0);
 		dbhand.dropIndexForProduit(1);
 		dbhand.deleteDb(0);
 		dbhand.deleteDb(1);
+
 	}
 	
 	public static void main(String[] args){
 		System.out.println("Main");
 		
-		new Test_InitDB().reInitDb();
+		new Test_InitDBWithIndexs().reInitDb();
 	}
 	
 }

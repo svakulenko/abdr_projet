@@ -30,6 +30,8 @@ public class MyS3Timer {
 	
 	public MyS3Timer (long tL /* seconds */) {
 
+		SecondsPerTransList.put(new Float(0.0), 0); // init 0 0
+		
 		logBeginTime = "S3Timer time start=" + dformat.format(new Date());
 		System.out.println(logBeginTime);
 		timeStart = System.currentTimeMillis(); //msec
@@ -43,18 +45,18 @@ public class MyS3Timer {
 		if (spanTimeStart != 0)
 			transactionTime = System.currentTimeMillis() - spanTimeStart;
 		Long purTime  = System.currentTimeMillis() - timeStart;
-		long execTime = purTime/1000; //get sec passed from start
+		Long execTime = purTime/1000; //get sec passed from start
 		
 		System.out.println("transactionTime=" + transactionTime);
-		String s =String.format("%1.1f", purTime.floatValue()/1000).replace(',', '.');
-		Float val = Float.parseFloat(s);
-		if(!s.equals("0,0")){
+		//String s =String.format("%1.1f", purTime.floatValue()/1000).replace(',', '.');
+		//Float val = Float.parseFloat(s);
+		Float val = execTime.floatValue();
+		//if(!s.equals("0,0")){
 		
-		
-		if( val != 0.0)
-		 
+		if(val != 0.0)
 			SecondsPerTransList.put(val, counter);
-		}
+		//}
+		
 		boolean isTimeIsOut = (execTime > timeLimit);
 		
 		if (isTimeIsOut){

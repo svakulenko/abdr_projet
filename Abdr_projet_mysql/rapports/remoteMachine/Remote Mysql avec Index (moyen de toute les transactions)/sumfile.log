@@ -1,0 +1,4 @@
+for coef1 with name: Remote Mysql avec Index (moyen de toute les transactions) MAX TRANSACTIONS=38
+for coef2 with name: Remote Mysql avec Index (moyen de toute les transactions) MAX TRANSACTIONS=22
+for coef5 with name: Remote Mysql avec Index (moyen de toute les transactions) MAX TRANSACTIONS=19
+for coef10 with name: Remote Mysql avec Index (moyen de toute les transactions) MAX TRANSACTIONS=16

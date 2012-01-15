@@ -129,7 +129,7 @@ public class DbHandler {
 						+ ", numProduit  BIGINT  NOT NULL" 
 						+ ", quantite    BIGINT  NOT NULL"
 						+ ", prix        BIGINT  NOT NULL"
-						+ ", PRIMARY KEY (numMagasin, numCommande, numProduit)"
+						//+ ", PRIMARY KEY (numMagasin, numCommande, client)"
 					    //+ ", FOREIGN KEY (numCommande) REFERENCES COMMANDE(numCommande)"
 					    //+ ", FOREIGN KEY (numProduit)  REFERENCES PRODUIT(numProduit)"
 					    + ");"
@@ -189,6 +189,7 @@ public class DbHandler {
 			+	" where numMagasin=" + magasin.toString()
 			+	" and client=" + client.toString()
 			;
+
 				
 				ResultSet rs = GetSqlResult(sql_query, magasin);
 				try {
@@ -272,17 +273,20 @@ public class DbHandler {
 				Random r = new Random();
 				Integer MaxLingeProduitPerTransaction = 10; 
 				int step = 0;
-				while(step++ < MaxLingeProduitPerTransaction){
-					//System.out.println("step="+ step);
+				Integer prix = 5; //constant
 				
-				 
-				//Integer iterator = new Integer(0);
-//				while (iterator < end){
-					Integer rInt = r.nextInt(maxx);
-					System.out.println("random=" + rInt);
-
+				Integer limitMag1Mag2 = new Float(maxx*0.9).intValue(); 
+				while(step++ < MaxLingeProduitPerTransaction){
+					Integer rInt = r.nextInt(limitMag1Mag2);
 					
-					Integer prix = 5; //constant
+					if (step == 10)
+						rInt = limitMag1Mag2 + r.nextInt(100);
+
+					System.out.printf(" step=%d, random=%d\n", step, rInt);
+					
+					
+					
+					
 					
 					if ( rInt > (maxx*0.9)) { //LAST PRODUIT CASE
 						System.out.println("second magasin transaction");
@@ -366,6 +370,28 @@ public class DbHandler {
 			}
 		}
 		
+		
+		public void dropIndexForProduit(Integer numMagasin){
+			if (connectionExist(numMagasin)){
+				sql_query = "drop INDEX produit_numProduit on Produit";
+				updateStatement(sql_query, numMagasin);
+				sql_query = "drop INDEX commande_numMagasin_client on COMMANDE";
+				updateStatement(sql_query, numMagasin);
+				sql_query = "drop INDEX commande_numMagasin_numCom_client on LIGNECOMMANDE";
+				updateStatement(sql_query, numMagasin);
+				
+			}
+		}
+		public void createIndexForProduit(Integer numMagasin){
+			if (connectionExist(numMagasin)){
+				sql_query = "CREATE INDEX produit_numProduit on PRODUIT (numProduit)";
+				updateStatement(sql_query, numMagasin);
+				sql_query = "CREATE INDEX commande_numMagasin_client on COMMANDE (numMagasin, client)";
+				updateStatement(sql_query, numMagasin);
+				//sql_query = "CREATE INDEX commande_numMagasin_numCom_client on LIGNECOMMANDE (numMagasin, numCommande, client)";
+				//updateStatement(sql_query, numMagasin);
+			}
+		}
 		public void updateProduit (
 				  Integer numMagasin
 				, Integer numCommande
@@ -391,9 +417,9 @@ public class DbHandler {
 				sql_query = "INSERT INTO COMMANDE "
 						+ "VALUES (" + numMagasin.toString()
 						+ ","        + numCommande.toString()
-						+ ", " + ClientId.toString()
+						+ ", "       + ClientId.toString()
 						+ ", CURDATE()"//        + dateCommande.toString()
-						+ ","  + prixTotal.toString()
+						+ ","       + prixTotal.toString()
 						+ ")";
 				
 				updateStatement(sql_query, numMagasin);
@@ -409,9 +435,12 @@ public class DbHandler {
 				, Integer quantite
 				, Integer prix
 				) throws SQLException{
+			
+			
 			if (connectionExist(magToConnect)){
 				sql_query = "INSERT INTO LIGNECOMMANDE "
-						+ "VALUES (" + numMagasin.toString()
+						+ "VALUES ("
+									 + numMagasin.toString()
 						+ ","        + numCommande.toString()
 						+ ","        + client.toString()
 						+ ","        + numProduit.toString()
@@ -463,7 +492,7 @@ public class DbHandler {
 			}
 		}
 		public ResultSet GetSqlResult(String sql_query, Integer Id)  {
-			System.out.println("::GetSqlResult query to execute: " + sql_query );
+			//System.out.println("::GetSqlResult query to execute: " + sql_query );
 			ResultSet rs = null;
 			try{
 				Statement st =  con[Id].createStatement();
