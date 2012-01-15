@@ -5,7 +5,6 @@ import java.util.*;
 //import tests.Test_SingleProcess.logStruct;
 
 import db.DbHandler;
-import db.loggerClass;
 import common.*;
 
 

@@ -10,7 +10,7 @@ import java.util.Set;
 
 import common.Conf;
 import common.logStruct;
-import db.loggerClass;
+import common.loggerClass;
 
 public class Test_MultyProcess {
 
